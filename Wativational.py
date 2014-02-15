@@ -21,13 +21,13 @@ def standardizeImgur(url):
         return  parsed_url.geturl()
     raise Exception()
 
-#font = ImageFont.truetype('/usr/share/fonts/TTF/DejaVuSans.ttf', 20)
+font = ImageFont.truetype('/usr/share/fonts/TTF/DejaVuSans.ttf', 72)
 
 r = praw.Reddit(user_agent='Wativational')
-submissions = r.get_subreddit('nocontext').get_hot(limit=20)
+submissions = r.get_subreddit('nocontext').get_new(limit=20)
 titles = [vars(x)['title'] for x in submissions]
 
-submissions = r.get_subreddit('wallpapers').get_hot(limit=20)
+submissions = r.get_subreddit('wallpapers').get_new(limit=20)
 images = [vars(x)['url'] for x in submissions]
 
 im = pyimgur.Imgur(IMGUR_ID)
@@ -48,4 +48,19 @@ for attempt_number in range(50):
 print(title)
 print(image)
 
-Image.open(image.download('/tmp/', overwrite=True))
+image = Image.open(image.download('/tmp/', overwrite=True))
+
+(w, h) = image.size
+draw = ImageDraw.Draw(image)
+lines = textwrap.wrap(title, width = 40)
+y_text = 0
+for line in lines:
+    (width, height) = font.getsize(line)
+    print(width, height, w, h)
+    print(y_text)
+    draw.text((0, y_text), line, font=font)
+    y_text += height
+
+    
+image.show()
+image.save('/tmp/'+url+'.png')
