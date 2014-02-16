@@ -5,7 +5,7 @@ import pyimgur
 from random import choice
 from urlparse import urlparse
 import textwrap
-from secrets import IMGUR_ID, IMGUR_SECRET
+from secrets import IMGUR_ID, IMGUR_SECRET, REDDIT_USER, REDDIT_PASS
 
 def standardizeImgur(url):
     parsed_url = urlparse(url)
@@ -24,6 +24,8 @@ def standardizeImgur(url):
 font = ImageFont.truetype('/usr/share/fonts/TTF/DejaVuSans.ttf', 72)
 
 r = praw.Reddit(user_agent='Wativational')
+r.login(REDDIT_USER, REDDIT_PASS)
+
 submissions = r.get_subreddit('nocontext').get_new(limit=50)
 titles = [vars(x)['title'] for x in submissions]
 
@@ -45,9 +47,6 @@ for attempt_number in range(50):
     image = im.get_image(url)
     break
 
-print(title)
-print(image)
-
 image = Image.open(image.download('/tmp/', overwrite=True))
 
 (w, h) = image.size
@@ -56,16 +55,16 @@ lines = textwrap.wrap(title, width = 40)
 y_text = 0
 for line in lines:
     (width, height) = font.getsize(line)
-    print(width, height, w, h)
-    print(y_text)
     draw.text((0, y_text), line, font=font)
     y_text += height
 
     
-image.show()
-image.save('/tmp/'+url+'.png')
+address = '/tmp/'+url+'.png'
+image.save(address)
 
-upload = im.upload_image(path='/tmp/'+url+'.png', title=title)
+upload = im.upload_image(path=address, title=title)
+
+r.submit('wativational', title, url=upload.link)
 
 print(upload.link)
 
