@@ -24,13 +24,13 @@ def standardizeImgur(url):
 font = ImageFont.truetype('/usr/share/fonts/TTF/DejaVuSans.ttf', 72)
 
 r = praw.Reddit(user_agent='Wativational')
-submissions = r.get_subreddit('nocontext').get_new(limit=20)
+submissions = r.get_subreddit('nocontext').get_new(limit=50)
 titles = [vars(x)['title'] for x in submissions]
 
-submissions = r.get_subreddit('wallpapers').get_new(limit=20)
+submissions = r.get_subreddit('wallpapers').get_hot(limit=50)
 images = [vars(x)['url'] for x in submissions]
 
-im = pyimgur.Imgur(IMGUR_ID)
+im = pyimgur.Imgur(IMGUR_ID, IMGUR_SECRET)
 
 title = choice(titles)
 url = ''
@@ -64,3 +64,8 @@ for line in lines:
     
 image.show()
 image.save('/tmp/'+url+'.png')
+
+upload = im.upload_image(path='/tmp/'+url+'.png', title=title)
+
+print(upload.link)
+
